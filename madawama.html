@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مداومة — تابع صلاتك</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green: #4ade80;
+  --green-dark: #22c55e;
+  --green-light: #86efac;
+  --bg: #0a1628;
+  --bg2: #0d2137;
+  --gold: #fbbf24;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Tajawal',sans-serif; direction:rtl; background:linear-gradient(135deg,var(--bg) 0%,var(--bg2) 50%,var(--bg) 100%); min-height:100vh; color:#fff; overflow-x:hidden; }
+
+/* LOADER */
+#loaderScreen { position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0a1628,#0d2137);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px; }
+.loader-logo { font-size:52px;animation:pulse 2s infinite; }
+.loader-title { font-size:30px;font-weight:900;color:var(--green); }
+.loader-msg { color:rgba(255,255,255,0.45);font-size:14px; }
+.loader-spinner { width:40px;height:40px;border:3px solid rgba(74,222,128,0.2);border-top-color:var(--green);border-radius:50%;animation:spin 1s linear infinite; }
+@keyframes spin { to{transform:rotate(360deg)} }
+@keyframes pulse { 0%,100%{transform:scale(1)}50%{transform:scale(1.08)} }
+
+/* AUTH */
+#authScreen { display:none;position:fixed;inset:0;z-index:500;background:linear-gradient(135deg,#060f1e,#0d2137,#060f1e);align-items:center;justify-content:center;overflow-y:auto;padding:20px; }
+.auth-box { width:100%;max-width:420px;background:rgba(255,255,255,0.04);border:1px solid rgba(74,222,128,0.2);border-radius:24px;padding:36px 32px;position:relative; }
+.auth-logo { text-align:center;margin-bottom:24px; }
+.auth-logo-icon { font-size:44px;display:block;margin-bottom:8px; }
+.auth-logo-name { font-size:28px;font-weight:900;color:var(--green); }
+.auth-logo-sub { font-size:13px;color:rgba(255,255,255,0.35);margin-top:4px; }
+.auth-tabs { display:flex;background:rgba(255,255,255,0.05);border-radius:12px;padding:4px;margin-bottom:24px;gap:4px; }
+.auth-tab { flex:1;padding:9px;border-radius:9px;text-align:center;cursor:pointer;font-size:14px;font-weight:600;color:rgba(255,255,255,0.45);transition:all 0.3s;font-family:'Tajawal',sans-serif;border:none;background:transparent; }
+.auth-tab.active { background:rgba(74,222,128,0.2);color:var(--green); }
+.auth-form { display:none; }
+.auth-form.active { display:block; }
+.input-group { margin-bottom:14px; }
+.input-group label { font-size:12px;color:rgba(255,255,255,0.45);display:block;margin-bottom:6px; }
+.input-group input { width:100%;padding:12px 16px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:#fff;font-size:14px;font-family:'Tajawal',sans-serif;outline:none;transition:border-color 0.3s; }
+.input-group input:focus { border-color:var(--green); }
+.input-group input::placeholder { color:rgba(255,255,255,0.22); }
+.auth-btn { width:100%;padding:14px;border-radius:14px;font-size:15px;font-weight:700;font-family:'Tajawal',sans-serif;cursor:pointer;border:none;transition:all 0.3s;margin-bottom:10px; }
+.auth-btn-primary { background:linear-gradient(135deg,var(--green),var(--green-dark));color:#0a1628; }
+.auth-btn-primary:hover { transform:translateY(-2px);box-shadow:0 8px 25px rgba(74,222,128,0.35); }
+.auth-btn-primary:disabled { opacity:0.6;cursor:not-allowed;transform:none; }
+#authError { display:none;padding:10px 14px;border-radius:10px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.25);color:#fca5a5;font-size:13px;margin-bottom:14px;text-align:center; }
+#authSuccess { display:none;padding:10px 14px;border-radius:10px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.25);color:var(--green);font-size:13px;margin-bottom:14px;text-align:center; }
+
+/* STARS */
+.stars { position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0; }
+.star { position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;animation:twinkle var(--d,3s) infinite var(--delay,0s); }
+@keyframes twinkle { 0%,100%{opacity:0.15}50%{opacity:0.8} }
+
+/* NAV */
+nav { position:sticky;top:0;z-index:100;background:rgba(10,22,40,0.93);backdrop-filter:blur(14px);border-bottom:1px solid rgba(100,200,150,0.12);padding:12px 24px;display:flex;align-items:center;justify-content:space-between; }
+.logo { font-size:20px;font-weight:900;color:var(--green);display:flex;align-items:center;gap:8px; }
+.nav-links { display:flex;gap:4px;align-items:center; }
+.nav-link { color:rgba(255,255,255,0.55);cursor:pointer;font-size:13px;padding:6px 12px;border-radius:20px;transition:all 0.3s;border:none;background:transparent;font-family:'Tajawal',sans-serif; }
+.nav-link:hover,.nav-link.active { color:var(--green);background:rgba(74,222,128,0.1); }
+.nav-user { display:flex;align-items:center;gap:8px;font-size:13px; }
+.nav-user-name { color:var(--green);font-weight:700;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.nav-logout { cursor:pointer;padding:4px 10px;border-radius:10px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);color:#fca5a5;font-size:12px;transition:all 0.3s;font-family:'Tajawal',sans-serif; }
+.nav-logout:hover { background:rgba(239,68,68,0.18); }
+
+/* PAGES */
+.page { display:none;position:relative;z-index:1;animation:fadeIn 0.4s ease; }
+.page.active { display:block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)} }
+
+/* HERO */
+.hero { text-align:center;padding:52px 24px 36px;position:relative; }
+.hero-badge { display:inline-block;background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.3);color:var(--green);padding:6px 18px;border-radius:20px;font-size:13px;margin-bottom:20px; }
+.hero h1 { font-size:clamp(26px,5vw,44px);font-weight:900;line-height:1.3;margin-bottom:14px; }
+.hero h1 span { color:var(--green); }
+.hero p { color:rgba(255,255,255,0.5);font-size:15px;max-width:460px;margin:0 auto 28px;line-height:1.9; }
+.hero-cta { display:flex;gap:12px;justify-content:center;flex-wrap:wrap; }
+.btn-primary { background:linear-gradient(135deg,var(--green),var(--green-dark));color:#0a1628;padding:12px 28px;border-radius:25px;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:all 0.3s;font-family:'Tajawal',sans-serif; }
+.btn-primary:hover { transform:translateY(-2px);box-shadow:0 8px 25px rgba(74,222,128,0.35); }
+.btn-secondary { background:transparent;color:var(--green);padding:12px 28px;border-radius:25px;font-size:15px;font-weight:500;border:1px solid rgba(74,222,128,0.35);cursor:pointer;transition:all 0.3s;font-family:'Tajawal',sans-serif; }
+.btn-secondary:hover { background:rgba(74,222,128,0.08); }
+
+/* LOCATION BANNER */
+#locationBanner { display:none;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:14px;padding:14px 18px;max-width:600px;margin:0 auto 20px;align-items:center;gap:12px;font-size:13px; }
+#locationBanner .loc-icon { font-size:20px; }
+#locationBanner .loc-text { flex:1;color:rgba(255,255,255,0.65); }
+#locationBanner .loc-btn { background:var(--green);color:#0a1628;border:none;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Tajawal',sans-serif;white-space:nowrap; }
+
+/* STATS */
+.stats-row { display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:600px;margin:0 auto 28px;padding:0 24px; }
+.stat-card { background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;text-align:center;transition:all 0.3s; }
+.stat-card:hover { border-color:rgba(74,222,128,0.2);transform:translateY(-2px); }
+.stat-num { font-size:28px;font-weight:800;color:var(--green); }
+.stat-label { font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px; }
+.stat-icon { font-size:18px;margin-bottom:4px; }
+
+/* PRAYER CARD */
+.prayer-section-wrap { padding:0 24px;max-width:600px;margin:0 auto 24px; }
+.prayer-card { background:rgba(255,255,255,0.04);border:1px solid rgba(74,222,128,0.18);border-radius:20px;padding:22px; }
+.prayer-card-header { display:flex;justify-content:space-between;align-items:center;margin-bottom:16px; }
+.prayer-card-header h3 { color:var(--green);font-size:15px;display:flex;align-items:center;gap:8px; }
+.city-badge { font-size:12px;color:rgba(255,255,255,0.38);font-weight:400; }
+.prayers-grid { display:grid;grid-template-columns:repeat(5,1fr);gap:8px; }
+.prayer-item { text-align:center;padding:14px 6px;border-radius:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);transition:all 0.3s;cursor:pointer;position:relative; }
+.prayer-item:hover { background:rgba(74,222,128,0.1);border-color:rgba(74,222,128,0.35);transform:translateY(-3px); }
+.prayer-item.current { background:rgba(74,222,128,0.15);border-color:var(--green);box-shadow:0 0 18px rgba(74,222,128,0.12); }
+.prayer-item.done { background:rgba(74,222,128,0.08);border-color:rgba(74,222,128,0.28);cursor:default;pointer-events:none; }
+.prayer-item.done:hover { transform:none;background:rgba(74,222,128,0.08); }
+.prayer-name { font-size:13px;font-weight:700;margin-bottom:4px; }
+.prayer-time { font-size:11px;color:rgba(255,255,255,0.4); }
+.prayer-check { display:none;position:absolute;top:5px;left:5px;width:18px;height:18px;background:var(--green);border-radius:50%;align-items:center;justify-content:center;font-size:10px;color:#0a1628;font-weight:900; }
+.prayer-item.done .prayer-check { display:flex; }
+.current-badge { font-size:10px;color:var(--green);margin-top:3px;min-height:14px; }
+
+/* PROGRESS */
+.progress-section { max-width:600px;margin:0 auto 24px;padding:0 24px; }
+.progress-bar-container { background:rgba(255,255,255,0.07);border-radius:10px;height:12px;overflow:hidden;margin-bottom:8px; }
+.progress-bar { height:100%;background:linear-gradient(90deg,var(--green-dark),var(--green));border-radius:10px;transition:width 0.6s ease;position:relative; }
+.progress-bar::after { content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.22),transparent);animation:shimmer 2s infinite; }
+@keyframes shimmer { 0%{transform:translateX(-100%)}100%{transform:translateX(100%)} }
+.progress-info { display:flex;justify-content:space-between;font-size:13px;color:rgba(255,255,255,0.45); }
+.progress-info span:first-child { color:var(--green);font-weight:700; }
+
+/* AYAH */
+.ayah-section { max-width:600px;margin:0 auto 28px;padding:0 24px; }
+.ayah-card { background:linear-gradient(135deg,rgba(74,222,128,0.07),rgba(34,197,94,0.03));border:1px solid rgba(74,222,128,0.18);border-radius:20px;padding:24px;text-align:center; }
+.ayah-text { font-size:19px;line-height:2.2;color:#e2ffd6;margin-bottom:10px;font-weight:500; }
+.ayah-source { font-size:13px;color:rgba(74,222,128,0.6); }
+.hadith-card { background:rgba(255,255,255,0.03);border-right:3px solid var(--green);border-radius:0 14px 14px 0;padding:16px 20px;margin-top:16px; }
+.hadith-text { font-size:14px;line-height:2;color:rgba(255,255,255,0.7); }
+.hadith-source { font-size:12px;color:rgba(74,222,128,0.5);margin-top:6px; }
+
+/* LEVEL */
+.level-section { max-width:600px;margin:0 auto;padding:0 24px 40px; }
+.level-card { background:rgba(255,255,255,0.04);border:1px solid rgba(74,222,128,0.16);border-radius:16px;padding:20px;display:flex;align-items:center;gap:16px; }
+.level-avatar { width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green-dark));display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0; }
+.level-info { flex:1;min-width:0; }
+.level-name { font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.level-title-text { font-size:13px;color:var(--green);margin-bottom:8px; }
+.xp-bar { background:rgba(255,255,255,0.09);border-radius:6px;height:8px;overflow:hidden; }
+.xp-fill { height:100%;background:linear-gradient(90deg,var(--green-dark),var(--green-light));border-radius:6px;transition:width 0.5s ease; }
+.xp-text { font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px; }
+.level-badge { background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.3);border-radius:10px;padding:6px 12px;font-size:13px;color:var(--green);font-weight:700;flex-shrink:0; }
+
+/* DASHBOARD */
+.dash-header { padding:28px 24px 14px;max-width:700px;margin:0 auto; }
+.dash-header h2 { font-size:22px;font-weight:800; }
+.dash-header p { color:rgba(255,255,255,0.4);font-size:14px;margin-top:4px; }
+.dash-grid { display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:700px;margin:0 auto;padding:0 24px 40px; }
+.dash-card { background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:20px; }
+.dash-card.wide { grid-column:1/-1; }
+.dash-card h4 { font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:12px; }
+.streak-display { font-size:52px;font-weight:900;color:var(--green);text-align:center; }
+.streak-label { text-align:center;color:rgba(255,255,255,0.38);font-size:13px; }
+.week-grid { display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:8px; }
+.week-day { aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-direction:column;gap:2px; }
+.week-day.full { background:rgba(74,222,128,0.25);color:var(--green); }
+.week-day.partial { background:rgba(234,179,8,0.16);color:#fbbf24; }
+.week-day.missed { background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.18); }
+.week-day.today { border:1px solid var(--green); }
+.points-big { font-size:38px;font-weight:900;color:var(--gold);text-align:center; }
+.points-label { text-align:center;color:rgba(255,255,255,0.35);font-size:13px; }
+.cal-grid { display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px; }
+.cal-day { aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px; }
+.cal-day.full { background:rgba(74,222,128,0.28); }
+.cal-day.partial { background:rgba(234,179,8,0.16); }
+.cal-day.empty { background:rgba(255,255,255,0.03); }
+.cal-day.today-empty { background:rgba(74,222,128,0.05);border:1px solid rgba(74,222,128,0.28); }
+
+/* PRAYER STAT BARS */
+.prayer-stat-bar { display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:8px; }
+.psb-label { width:44px;color:rgba(255,255,255,0.42);flex-shrink:0; }
+.psb-track { flex:1;background:rgba(255,255,255,0.07);border-radius:4px;height:8px;overflow:hidden; }
+.psb-fill { height:100%;border-radius:4px;transition:width 0.5s ease; }
+.psb-fill.low { background:linear-gradient(90deg,#f59e0b,#fbbf24); }
+.psb-fill.high { background:linear-gradient(90deg,#22c55e,#4ade80); }
+.psb-pct { font-size:12px;width:32px;text-align:left; }
+
+/* QURAN */
+.quran-header { padding:28px 24px 14px;max-width:700px;margin:0 auto;text-align:center; }
+.quran-header h2 { font-size:22px;font-weight:800;margin-bottom:12px; }
+.quran-tabs { display:flex;gap:8px;justify-content:center;margin-bottom:20px; }
+.qtab { padding:8px 22px;border-radius:20px;font-size:14px;cursor:pointer;transition:all 0.3s;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);font-family:'Tajawal',sans-serif;background:transparent; }
+.qtab.active { background:rgba(74,222,128,0.16);border-color:var(--green);color:var(--green); }
+.quran-content { max-width:700px;margin:0 auto;padding:0 24px 40px; }
+.verse-card { background:rgba(255,255,255,0.03);border:1px solid rgba(74,222,128,0.1);border-radius:16px;padding:24px;margin-bottom:14px;transition:all 0.3s; }
+.verse-card:hover { background:rgba(74,222,128,0.05);border-color:rgba(74,222,128,0.22); }
+.verse-arabic { font-size:21px;line-height:2.2;text-align:center;margin-bottom:10px;color:#e2ffd6; }
+.verse-trans { font-size:13px;line-height:1.9;color:rgba(255,255,255,0.5);text-align:center; }
+.verse-ref { text-align:center;color:rgba(74,222,128,0.5);font-size:12px;margin-top:8px; }
+.hadith-big-card { background:rgba(255,255,255,0.03);border-right:4px solid var(--green);border-radius:0 16px 16px 0;padding:20px 24px;margin-bottom:14px; }
+.hadith-narr { font-size:13px;color:rgba(74,222,128,0.6);margin-bottom:8px; }
+.hadith-main { font-size:15px;line-height:2.1;color:#fff; }
+.hadith-ref { font-size:12px;color:rgba(255,255,255,0.28);margin-top:8px; }
+
+/* CHALLENGES */
+.challenges-header { padding:28px 24px 14px;max-width:700px;margin:0 auto; }
+.challenges-header h2 { font-size:22px;font-weight:800; }
+.challenges-header p { color:rgba(255,255,255,0.4);font-size:14px;margin-top:4px; }
+.challenges-list { max-width:700px;margin:0 auto;padding:0 24px;display:flex;flex-direction:column;gap:12px;margin-bottom:28px; }
+.challenge-card { background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:18px;display:flex;align-items:center;gap:14px;transition:all 0.3s; }
+.challenge-card:hover { background:rgba(74,222,128,0.05);border-color:rgba(74,222,128,0.2);transform:translateY(-1px); }
+.challenge-icon { width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0; }
+.c-gold { background:rgba(234,179,8,0.16); }
+.c-green { background:rgba(74,222,128,0.1); }
+.c-blue { background:rgba(96,165,250,0.1); }
+.challenge-info { flex:1;min-width:0; }
+.challenge-title { font-size:14px;font-weight:700;margin-bottom:4px; }
+.challenge-desc { font-size:12px;color:rgba(255,255,255,0.42);margin-bottom:8px; }
+.mini-progress { background:rgba(255,255,255,0.07);border-radius:4px;height:5px;overflow:hidden; }
+.mini-fill { height:100%;border-radius:4px;background:linear-gradient(90deg,var(--green-dark),var(--green)); }
+.challenge-reward { font-size:11px;color:var(--gold);margin-top:6px; }
+
+/* TOAST */
+.toast { position:fixed;bottom:24px;right:50%;transform:translateX(50%);background:rgba(74,222,128,0.97);color:#0a1628;padding:12px 24px;border-radius:25px;font-size:14px;font-weight:700;z-index:1000;display:none;text-align:center;max-width:300px;box-shadow:0 8px 30px rgba(74,222,128,0.3); }
+
+/* COMPLETION */
+#completionAnim { display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,0.75);align-items:center;justify-content:center;flex-direction:column;gap:16px; }
+.completion-emoji { font-size:80px;animation:bounce 0.5s ease; }
+.completion-text { font-size:24px;font-weight:800;color:var(--green);text-align:center; }
+.completion-sub { font-size:16px;color:rgba(255,255,255,0.65); }
+@keyframes bounce { 0%,100%{transform:scale(1)}50%{transform:scale(1.25)} }
+
+/* RESPONSIVE */
+@media(max-width:480px) {
+  .nav-links { gap:1px; }
+  .nav-link { font-size:11px;padding:5px 7px; }
+  .nav-user-name { display:none; }
+  .prayers-grid { gap:5px; }
+  .prayer-item { padding:10px 3px; }
+  .prayer-name { font-size:11px; }
+  .prayer-time { font-size:9px; }
+  .dash-grid { grid-template-columns:1fr; }
+  .auth-box { padding:24px 18px; }
+  .stats-row { gap:8px; }
+  .stat-num { font-size:22px; }
+}
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<!-- LOADER -->
+<div id="loaderScreen">
+  <div class="loader-logo">🌙</div>
+  <div class="loader-title">مداومة</div>
+  <div class="loader-spinner"></div>
+  <div class="loader-msg" id="loaderMsg">جاري التحميل...</div>
+</div>
+
+<!-- AUTH -->
+<div id="authScreen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <span class="auth-logo-icon">🌙</span>
+      <div class="auth-logo-name">مداومة</div>
+      <div class="auth-logo-sub">تابع صلاتك — ابني عادة تدوم</div>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">تسجيل الدخول</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">حساب جديد</button>
+    </div>
+    <div id="authError"></div>
+    <div id="authSuccess"></div>
+
+    <!-- Login -->
+    <div class="auth-form active" id="form-login">
+      <div class="input-group">
+        <label>الإيميل</label>
+        <input type="email" id="loginEmail" placeholder="example@email.com" dir="ltr" onkeydown="if(event.key==='Enter')loginUser()">
+      </div>
+      <div class="input-group">
+        <label>كلمة المرور</label>
+        <input type="password" id="loginPass" placeholder="••••••••" dir="ltr" onkeydown="if(event.key==='Enter')loginUser()">
+      </div>
+      <button class="auth-btn auth-btn-primary" onclick="loginUser()">دخول</button>
+    </div>
+
+    <!-- Register -->
+    <div class="auth-form" id="form-register">
+      <div class="input-group">
+        <label>الاسم</label>
+        <input type="text" id="regName" placeholder="اسمك الكريم">
+      </div>
+      <div class="input-group">
+        <label>الإيميل</label>
+        <input type="email" id="regEmail" placeholder="example@email.com" dir="ltr">
+      </div>
+      <div class="input-group">
+        <label>كلمة المرور (6 أحرف على الأقل)</label>
+        <input type="password" id="regPass" placeholder="••••••••" dir="ltr" onkeydown="if(event.key==='Enter')registerUser()">
+      </div>
+      <div class="input-group">
+        <label>مدينتك (للصلاة لو مش هتسمح بالموقع)</label>
+        <input type="text" id="regCity" placeholder="القاهرة، الرياض، دبي...">
+      </div>
+      <button class="auth-btn auth-btn-primary" onclick="registerUser()">إنشاء الحساب</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appContainer" style="display:none">
+  <nav>
+    <div class="logo">🌙 مداومة</div>
+    <div class="nav-links">
+      <button class="nav-link active" onclick="showPage('home')">الرئيسية</button>
+      <button class="nav-link" onclick="showPage('dashboard')">إحصائياتي</button>
+      <button class="nav-link" onclick="showPage('quran')">قرآن</button>
+      <button class="nav-link" onclick="showPage('challenges')">تحديات</button>
+    </div>
+    <div class="nav-user">
+      <span class="nav-user-name" id="userNameNav">مستخدم</span>
+      <button class="nav-logout" onclick="logoutUser()">خروج</button>
+    </div>
+  </nav>
+
+  <!-- HOME -->
+  <div class="page active" id="page-home">
+    <div class="hero">
+      <div class="hero-badge">🌙 مرحباً، <span id="welcomeName">مستخدم</span></div>
+      <h1>كل صلاة خطوة<br>نحو <span>الجنة</span></h1>
+      <p>تابع صلواتك يومياً، واكسب نقاط، وابني عادة تدوم مع الله بطريقة ممتعة ومحفزة</p>
+      <div class="hero-cta">
+        <button class="btn-primary" onclick="document.getElementById('prayersSection').scrollIntoView({behavior:'smooth'})">سجّل صلاتك الآن</button>
+        <button class="btn-secondary" onclick="showPage('dashboard')">شوف تقدمك</button>
+      </div>
+    </div>
+
+    <div id="locationBanner" style="display:none">
+      <span class="loc-icon">📍</span>
+      <span class="loc-text">جاري تحديد موقعك...</span>
+      <button class="loc-btn" onclick="document.getElementById('locationBanner').style.display='none'">✕</button>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon">🔥</div>
+        <div class="stat-num" id="streakNum">0</div>
+        <div class="stat-label">أيام متتالية</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-num" id="totalPoints">0</div>
+        <div class="stat-label">نقطة مكتسبة</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📿</div>
+        <div class="stat-num" id="totalPrayers">0</div>
+        <div class="stat-label">صلاة محافظ</div>
+      </div>
+    </div>
+
+    <div id="prayersSection" class="prayer-section-wrap">
+      <div class="prayer-card">
+        <div class="prayer-card-header">
+          <h3>⏰ مواقيت الصلاة — <span class="city-badge" id="cityName">القاهرة</span></h3>
+        </div>
+        <div class="prayers-grid">
+          <div class="prayer-item" id="p-fajr" onclick="markPrayer('fajr')">
+            <div class="prayer-check">✓</div>
+            <div class="prayer-name">الفجر</div>
+            <div class="prayer-time" id="t-fajr">--:--</div>
+            <div class="current-badge" id="b-fajr"></div>
+          </div>
+          <div class="prayer-item" id="p-dhuhr" onclick="markPrayer('dhuhr')">
+            <div class="prayer-check">✓</div>
+            <div class="prayer-name">الظهر</div>
+            <div class="prayer-time" id="t-dhuhr">--:--</div>
+            <div class="current-badge" id="b-dhuhr"></div>
+          </div>
+          <div class="prayer-item" id="p-asr" onclick="markPrayer('asr')">
+            <div class="prayer-check">✓</div>
+            <div class="prayer-name">العصر</div>
+            <div class="prayer-time" id="t-asr">--:--</div>
+            <div class="current-badge" id="b-asr"></div>
+          </div>
+          <div class="prayer-item" id="p-maghrib" onclick="markPrayer('maghrib')">
+            <div class="prayer-check">✓</div>
+            <div class="prayer-name">المغرب</div>
+            <div class="prayer-time" id="t-maghrib">--:--</div>
+            <div class="current-badge" id="b-maghrib"></div>
+          </div>
+          <div class="prayer-item" id="p-isha" onclick="markPrayer('isha')">
+            <div class="prayer-check">✓</div>
+            <div class="prayer-name">العشاء</div>
+            <div class="prayer-time" id="t-isha">--:--</div>
+            <div class="current-badge" id="b-isha"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="progress-section">
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBar" style="width:0%"></div>
+      </div>
+      <div class="progress-info">
+        <span id="progressText">صليت 0 من 5</span>
+        <span id="progressPercent">0%</span>
+      </div>
+    </div>
+
+    <div class="ayah-section">
+      <div class="ayah-card">
+        <div class="ayah-text">﴿ إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَّوْقُوتًا ﴾</div>
+        <div class="ayah-source">سورة النساء — آية 103</div>
+      </div>
+      <div class="hadith-card">
+        <div class="hadith-text">قال رسول الله ﷺ: «أفضل الأعمال إلى الله الصلاة لأول وقتها، ثم بر الوالدين، ثم الجهاد في سبيل الله»</div>
+        <div class="hadith-source">متفق عليه</div>
+      </div>
+    </div>
+
+    <div class="level-section">
+      <div class="level-card">
+        <div class="level-avatar">🌿</div>
+        <div class="level-info">
+          <div class="level-name" id="userName">مستخدم</div>
+          <div class="level-title-text" id="levelTitle">المستوى 1 — المبتدئ</div>
+          <div class="xp-bar"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+          <div class="xp-text" id="xpText">0 / 200 نقطة للمستوى التالي</div>
+        </div>
+        <div class="level-badge" id="levelBadge">مبتدئ</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="page" id="page-dashboard">
+    <div class="dash-header">
+      <h2>📊 إحصائياتي</h2>
+      <p>تابع رحلتك الإيمانية يوماً بيوم</p>
+    </div>
+    <div class="dash-grid">
+      <div class="dash-card">
+        <div class="streak-display" id="dashStreak">0</div>
+        <div class="streak-label">🔥 يوم متتالي</div>
+      </div>
+      <div class="dash-card">
+        <div class="points-big" id="dashPoints">0</div>
+        <div class="points-label">⭐ نقطة مكتسبة</div>
+      </div>
+      <div class="dash-card wide">
+        <h4>هذا الأسبوع</h4>
+        <div class="week-grid" id="weekGrid"></div>
+      </div>
+      <div class="dash-card wide">
+        <h4>خريطة الالتزام — آخر 28 يوم</h4>
+        <div class="cal-grid" id="calGrid"></div>
+        <div style="display:flex;gap:16px;margin-top:12px;font-size:11px;color:rgba(255,255,255,0.3)">
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:3px;background:rgba(74,222,128,0.28);display:inline-block"></span>يوم كامل</span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:3px;background:rgba(234,179,8,0.16);display:inline-block"></span>جزئي</span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:3px;background:rgba(255,255,255,0.04);display:inline-block"></span>فائت</span>
+        </div>
+      </div>
+      <div class="dash-card wide">
+        <h4>نسبة الالتزام بكل صلاة</h4>
+        <div id="prayerStatBars" style="margin-top:4px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QURAN -->
+  <div class="page" id="page-quran">
+    <div class="quran-header">
+      <h2>📿 قرآن وأحاديث</h2>
+      <div class="quran-tabs">
+        <button class="qtab active" onclick="switchTab('ayat',this)">آيات الصلاة</button>
+        <button class="qtab" onclick="switchTab('hadith',this)">أحاديث شريفة</button>
+      </div>
+    </div>
+    <div class="quran-content" id="quranContent"></div>
+  </div>
+
+  <!-- CHALLENGES -->
+  <div class="page" id="page-challenges">
+    <div class="challenges-header">
+      <h2>🏆 التحديات والإنجازات</h2>
+      <p>تحدّى نفسك واكسب مكافآت</p>
+    </div>
+    <div class="challenges-list" id="challengesList"></div>
+  </div>
+</div>
+
+<div id="completionAnim">
+  <div class="completion-emoji">🌙</div>
+  <div class="completion-text">ما شاء الله!</div>
+  <div class="completion-sub">أتممت الصلوات الخمس اليوم 🎉</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// STORAGE HELPERS
+// ============================================================
+const LS = {
+  get: k => { try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } },
+  set: (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} },
+  del: k => { try { localStorage.removeItem(k); } catch(e){} }
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let currentUser = null;  // { uid, name, email, city }
+let userData = null;     // { points, streak, totalPrayed, prayers:{}, lastActiveDate }
+let prayerTimes = null;
+let prayers = { fajr:false, dhuhr:false, asr:false, maghrib:false, isha:false };
+let donePrayers = 0;
+let userLat = null, userLng = null;
+let locationAsked = false;
+let curQuranTab = 'ayat';
+
+const todayKey = getTodayKey();
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  makeStars();
+  showLoader('جاري التحميل...');
+
+  const savedSession = LS.get('madawama_session');
+  if (savedSession) {
+    currentUser = savedSession;
+    userData = LS.get('madawama_data_' + currentUser.uid) || defaultUserData(currentUser.name, currentUser.city);
+    loadTodayPrayers();
+    checkStreak();
+    askLocationOnce(() => fetchPrayerTimes(() => { hideLoader(); showApp(); }));
+  } else {
+    hideLoader();
+    showAuthScreen();
+  }
+}
+
+function defaultUserData(name, city) {
+  return { name, city: city||'القاهرة', points:0, streak:0, totalPrayed:0, prayers:{}, lastActiveDate:'' };
+}
+
+function saveUserData() {
+  if (!currentUser) return;
+  LS.set('madawama_data_' + currentUser.uid, userData);
+}
+
+// ============================================================
+// AUTH — email/password stored in localStorage (hashed-ish)
+// ============================================================
+function hashPass(p) {
+  // simple deterministic hash — not real security but avoids plaintext
+  let h = 0;
+  for (let i = 0; i < p.length; i++) { h = ((h << 5) - h) + p.charCodeAt(i); h |= 0; }
+  return 'h' + Math.abs(h).toString(36);
+}
+
+window.registerUser = function() {
+  clearAuthMessages();
+  const name  = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim().toLowerCase();
+  const pass  = document.getElementById('regPass').value;
+  const city  = document.getElementById('regCity').value.trim() || 'القاهرة';
+
+  if (!name)  return showAuthError('من فضلك ادخل اسمك');
+  if (!email || !email.includes('@')) return showAuthError('إيميل غير صحيح');
+  if (pass.length < 6) return showAuthError('كلمة المرور لازم تكون 6 أحرف على الأقل');
+
+  const accounts = LS.get('madawama_accounts') || {};
+  if (accounts[email]) return showAuthError('الإيميل ده مسجل بالفعل');
+
+  const uid = 'u_' + Date.now().toString(36);
+  accounts[email] = { uid, name, email, city, passHash: hashPass(pass) };
+  LS.set('madawama_accounts', accounts);
+
+  // create user data
+  const data = defaultUserData(name, city);
+  LS.set('madawama_data_' + uid, data);
+
+  currentUser = { uid, name, email, city };
+  userData = data;
+  LS.set('madawama_session', currentUser);
+
+  showAuthSuccess('تم إنشاء حسابك بنجاح! 🌙');
+  setTimeout(() => {
+    showLoader('مرحباً ' + currentUser.name + ' 🌙');
+    loadTodayPrayers();
+    checkStreak();
+    askLocationOnce(() => fetchPrayerTimes(() => { hideLoader(); showApp(); }));
+  }, 800);
+};
+
+window.loginUser = function() {
+  clearAuthMessages();
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pass  = document.getElementById('loginPass').value;
+
+  if (!email || !pass) return showAuthError('من فضلك ادخل الإيميل وكلمة المرور');
+
+  const accounts = LS.get('madawama_accounts') || {};
+  const acc = accounts[email];
+  if (!acc) return showAuthError('مفيش حساب بالإيميل ده');
+  if (acc.passHash !== hashPass(pass)) return showAuthError('كلمة المرور غلط');
+
+  currentUser = { uid: acc.uid, name: acc.name, email: acc.email, city: acc.city };
+  userData = LS.get('madawama_data_' + acc.uid) || defaultUserData(acc.name, acc.city);
+  LS.set('madawama_session', currentUser);
+
+  loadTodayPrayers();
+  checkStreak();
+  showLoader('مرحباً ' + currentUser.name + ' 🌙');
+  askLocationOnce(() => fetchPrayerTimes(() => { hideLoader(); showApp(); }));
+};
+
+window.logoutUser = function() {
+  if (!window.confirm('هل تريد تسجيل الخروج؟')) return;
+  LS.del('madawama_session');
+  currentUser = null;
+  userData = null;
+  prayers = { fajr:false, dhuhr:false, asr:false, maghrib:false, isha:false };
+  donePrayers = 0;
+  locationAsked = false;
+  const lb = document.getElementById('locationBanner');
+  if (lb) lb.style.display = 'none';
+  showAuthScreen();
+};
+
+// ============================================================
+// LOCATION — asked ONCE per session
+// ============================================================
+function askLocationOnce(cb) {
+  if (locationAsked) { cb(); return; }
+  locationAsked = true;
+
+  if (!navigator.geolocation) { cb(); return; }
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      userLat = pos.coords.latitude;
+      userLng = pos.coords.longitude;
+      // reverse geocode
+      fetch(`https://nominatim.openstreetmap.org/reverse?lat=${userLat}&lon=${userLng}&format=json`)
+        .then(r => r.json())
+        .then(d => {
+          const city = d.address?.city || d.address?.town || d.address?.state || currentUser.city;
+          document.getElementById('cityName').textContent = city;
+          if (currentUser) {
+            currentUser.city = city;
+            LS.set('madawama_session', currentUser);
+          }
+          // show location banner
+          const lb = document.getElementById('locationBanner');
+          if (lb) { lb.querySelector('.loc-text').textContent = '📍 موقعك: ' + city + ' — مواقيت الصلاة دقيقة لموقعك الحالي'; lb.style.display='flex'; }
+        })
+        .catch(() => {})
+        .finally(() => cb());
+    },
+    () => { cb(); },  // denied — use saved city
+    { timeout: 6000 }
+  );
+}
+
+// ============================================================
+// PRAYER TIMES
+// ============================================================
+function fetchPrayerTimes(cb) {
+  const today = new Date();
+  const dd = String(today.getDate()).padStart(2,'0');
+  const mm = String(today.getMonth()+1).padStart(2,'0');
+  const yyyy = today.getFullYear();
+
+  let url;
+  if (userLat && userLng) {
+    url = `https://api.aladhan.com/v1/timings/${dd}-${mm}-${yyyy}?latitude=${userLat}&longitude=${userLng}&method=5`;
+  } else {
+    const city = encodeURIComponent(currentUser?.city || 'Cairo');
+    url = `https://api.aladhan.com/v1/timingsByCity/${dd}-${mm}-${yyyy}?city=${city}&country=EG&method=5`;
+  }
+
+  fetch(url)
+    .then(r => r.json())
+    .then(d => {
+      if (d.status === 'OK') prayerTimes = d.data.timings;
+      cb();
+    })
+    .catch(() => {
+      prayerTimes = { Fajr:'04:52', Dhuhr:'12:10', Asr:'15:38', Maghrib:'18:24', Isha:'19:48' };
+      cb();
+    });
+}
+
+function to12h(t) {
+  if (!t) return '--:--';
+  const [h, m] = t.split(':').map(Number);
+  const suffix = h >= 12 ? 'م' : 'ص';
+  const h12 = h % 12 || 12;
+  return `${h12}:${String(m).padStart(2,'0')} ${suffix}`;
+}
+
+function getCurrentPrayer() {
+  if (!prayerTimes) return null;
+  const now = new Date();
+  const cur = now.getHours() * 60 + now.getMinutes();
+  const times = [
+    { id:'fajr',    t: prayerTimes.Fajr },
+    { id:'dhuhr',   t: prayerTimes.Dhuhr },
+    { id:'asr',     t: prayerTimes.Asr },
+    { id:'maghrib', t: prayerTimes.Maghrib },
+    { id:'isha',    t: prayerTimes.Isha },
+  ];
+  let current = 'isha';
+  for (const p of times) {
+    if (!p.t) continue;
+    const [h, m] = p.t.split(':').map(Number);
+    if (cur >= h * 60 + m) current = p.id;
+  }
+  return current;
+}
+
+// ============================================================
+// TODAY PRAYERS
+// ============================================================
+function loadTodayPrayers() {
+  if (!userData) return;
+  const tp = userData.prayers?.[todayKey] || {};
+  prayers.fajr    = tp.fajr    || false;
+  prayers.dhuhr   = tp.dhuhr   || false;
+  prayers.asr     = tp.asr     || false;
+  prayers.maghrib = tp.maghrib || false;
+  prayers.isha    = tp.isha    || false;
+  donePrayers = Object.values(prayers).filter(Boolean).length;
+}
+
+// ============================================================
+// STREAK
+// ============================================================
+function checkStreak() {
+  if (!userData) return;
+  const yesterday = getYesterdayKey();
+  const last = userData.lastActiveDate;
+  if (last && last !== todayKey && last !== yesterday) {
+    userData.streak = 0;
+    saveUserData();
+  }
+}
+
+// ============================================================
+// MARK PRAYER
+// ============================================================
+window.markPrayer = function(id) {
+  if (prayers[id]) return;
+  prayers[id] = true;
+  donePrayers++;
+
+  // UI update
+  const el = document.getElementById('p-' + id);
+  el.classList.add('done');
+  el.classList.remove('current');
+  document.getElementById('b-' + id).textContent = '';
+
+  const pts = { fajr:20, dhuhr:10, asr:10, maghrib:10, isha:10 };
+  let earned = pts[id];
+  let newPoints = (userData.points || 0) + earned;
+  let newTotal  = (userData.totalPrayed || 0) + 1;
+  let newStreak = userData.streak || 0;
+
+  // streak logic
+  if (donePrayers === 1 && userData.lastActiveDate !== todayKey) {
+    const yesterday = getYesterdayKey();
+    newStreak = (userData.lastActiveDate === yesterday) ? (userData.streak || 0) + 1 : 1;
+  }
+
+  // full day bonus
+  if (donePrayers === 5) {
+    newPoints += 50;
+    showToast('🔥 أتممت اليوم كاملاً! +50 نقطة مكافأة! ما شاء الله!');
+    document.getElementById('completionAnim').style.display = 'flex';
+    setTimeout(() => document.getElementById('completionAnim').style.display = 'none', 3000);
+  } else {
+    const msgs = [
+      'ما شاء الله! تقبّل الله صلاتك 🤍',
+      'أحسنت! كل صلاة نور ✨',
+      'بارك الله فيك! استمر 🌿',
+      'جزاك الله خيراً 💚',
+      'تقبّل الله منك! 🌙'
+    ];
+    showToast(msgs[Math.floor(Math.random() * msgs.length)]);
+  }
+
+  // save
+  if (!userData.prayers) userData.prayers = {};
+  if (!userData.prayers[todayKey]) userData.prayers[todayKey] = {};
+  userData.prayers[todayKey][id] = true;
+  userData.points = newPoints;
+  userData.totalPrayed = newTotal;
+  userData.streak = newStreak;
+  userData.lastActiveDate = todayKey;
+  saveUserData();
+
+  // update UI
+  updateStatsUI(newPoints, newStreak, newTotal);
+  updateProgress();
+};
+
+// ============================================================
+// STATS UI
+// ============================================================
+function updateStatsUI(pts, streak, total) {
+  const fmt = n => n.toLocaleString('ar-EG');
+  ['totalPoints'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=fmt(pts); });
+  ['streakNum','dashStreak'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=streak; });
+  const tp=document.getElementById('totalPrayers'); if(tp) tp.textContent=total;
+  const dp=document.getElementById('dashPoints'); if(dp) dp.textContent=fmt(pts);
+
+  const lvl = getLevel(pts);
+  const lt=document.getElementById('levelTitle'); if(lt) lt.textContent=`المستوى ${lvl.level} — ${lvl.title}`;
+  const lb=document.getElementById('levelBadge'); if(lb) lb.textContent=lvl.badge;
+  const xf=document.getElementById('xpFill');
+  if(xf) {
+    const pct = lvl.next === 99999 ? 100 : Math.min(100, Math.round((pts - lvl.base) / (lvl.next - lvl.base) * 100));
+    xf.style.width = pct + '%';
+  }
+  const xt=document.getElementById('xpText');
+  if(xt) xt.textContent = lvl.next === 99999 ? 'وصلت أعلى مستوى! 🏆' : `${fmt(pts)} / ${fmt(lvl.next)} نقطة للمستوى التالي`;
+}
+
+function updateProgress() {
+  const pct = Math.round(donePrayers / 5 * 100);
+  const pb=document.getElementById('progressBar'); if(pb) pb.style.width=pct+'%';
+  const pt=document.getElementById('progressText'); if(pt) pt.textContent='صليت '+donePrayers+' من 5';
+  const pp=document.getElementById('progressPercent'); if(pp) pp.textContent=pct+'%';
+}
+
+function getLevel(pts) {
+  const levels = [
+    {level:1,title:'المبتدئ',  badge:'مبتدئ', base:0,     next:200},
+    {level:2,title:'الساعي',   badge:'ساعي',  base:200,   next:500},
+    {level:3,title:'المداوم',  badge:'مداوم', base:500,   next:1000},
+    {level:4,title:'المحافظ',  badge:'محافظ', base:1000,  next:2000},
+    {level:5,title:'المثابر',  badge:'مثابر', base:2000,  next:3500},
+    {level:6,title:'المتهجد',  badge:'متهجد', base:3500,  next:5500},
+    {level:7,title:'الخاشع',   badge:'خاشع',  base:5500,  next:8000},
+    {level:8,title:'المنيب',   badge:'منيب',  base:8000,  next:11000},
+    {level:9,title:'الأواب',   badge:'أواب',  base:11000, next:15000},
+    {level:10,title:'الولي',   badge:'ولي',   base:15000, next:99999},
+  ];
+  for (let i=levels.length-1; i>=0; i--) { if(pts>=levels[i].base) return levels[i]; }
+  return levels[0];
+}
+
+// ============================================================
+// SHOW APP
+// ============================================================
+function showApp() {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('appContainer').style.display = 'block';
+  document.getElementById('loaderScreen').style.display = 'none';
+
+  const name = currentUser?.name || 'مستخدم';
+  ['userName','userNameNav','welcomeName'].forEach(id => {
+    const e=document.getElementById(id); if(e) e.textContent=name;
+  });
+
+  document.getElementById('cityName').textContent = currentUser?.city || 'القاهرة';
+  updateStatsUI(userData.points||0, userData.streak||0, userData.totalPrayed||0);
+  renderPrayerCards();
+  updateProgress();
+  buildWeek();
+  buildCal();
+  buildPrayerStats();
+  buildChallenges();
+  renderQuran(curQuranTab);
+}
+
+function renderPrayerCards() {
+  const timesMap = {
+    fajr: prayerTimes?.Fajr,
+    dhuhr: prayerTimes?.Dhuhr,
+    asr: prayerTimes?.Asr,
+    maghrib: prayerTimes?.Maghrib,
+    isha: prayerTimes?.Isha,
+  };
+  const current = getCurrentPrayer();
+
+  ['fajr','dhuhr','asr','maghrib','isha'].forEach(id => {
+    const el = document.getElementById('p-' + id);
+    const te = document.getElementById('t-' + id);
+    const be = document.getElementById('b-' + id);
+    if (!el) return;
+    if (te) te.textContent = to12h(timesMap[id]);
+    if (prayers[id]) { el.classList.add('done'); el.classList.remove('current'); }
+    else if (id === current) {
+      el.classList.add('current');
+      if (be) be.textContent = '● الآن';
+    }
+  });
+}
+
+// ============================================================
+// DASHBOARD HELPERS
+// ============================================================
+function buildWeek() {
+  const wg = document.getElementById('weekGrid');
+  if (!wg) return;
+  const dayNames = ['أحد','اثن','ثلاث','أرب','خمس','جمع','سبت'];
+  const today = new Date().getDay();
+  wg.innerHTML = '';
+  for (let i=0; i<7; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - (today - i));
+    const key = dateKey(d);
+    const count = i <= today ? Object.values(userData?.prayers?.[key]||{}).filter(Boolean).length : null;
+    const type = count === null ? 'missed' : count===5 ? 'full' : count>0 ? 'partial' : 'missed';
+    const isToday = i === today;
+    wg.innerHTML += `<div class="week-day ${type} ${isToday?'today':''}">
+      <span style="font-size:9px;color:rgba(255,255,255,0.28)">${dayNames[i]}</span>
+      <span>${count!==null ? count+'/5' : '–'}</span>
+    </div>`;
+  }
+}
+
+function buildCal() {
+  const cg = document.getElementById('calGrid');
+  if (!cg) return;
+  cg.innerHTML = '';
+  for (let i=27; i>=0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = dateKey(d);
+    const count = Object.values(userData?.prayers?.[key]||{}).filter(Boolean).length;
+    const type = i===0 ? (count===5?'full':count>0?'partial':'today-empty')
+                       : count===5?'full':count>2?'partial':'empty';
+    cg.innerHTML += `<div class="cal-day ${type}" title="${d.getDate()}/${d.getMonth()+1}">${d.getDate()}</div>`;
+  }
+}
+
+function buildPrayerStats() {
+  const el = document.getElementById('prayerStatBars');
+  if (!el || !userData?.prayers) return;
+  const pNames = { fajr:'الفجر', dhuhr:'الظهر', asr:'العصر', maghrib:'المغرب', isha:'العشاء' };
+  const counts = { fajr:0, dhuhr:0, asr:0, maghrib:0, isha:0 };
+  let days = 0;
+  Object.values(userData.prayers).forEach(dp => {
+    days++;
+    Object.keys(counts).forEach(k => { if(dp[k]) counts[k]++; });
+  });
+  if (days === 0) { el.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:13px">لا توجد بيانات بعد — ابدأ بتسجيل صلاتك</div>'; return; }
+  el.innerHTML = '';
+  Object.entries(pNames).forEach(([k,n]) => {
+    const pct = days > 0 ? Math.round(counts[k]/days*100) : 0;
+    const cls = pct >= 70 ? 'high' : 'low';
+    const color = pct >= 70 ? '#4ade80' : '#fbbf24';
+    el.innerHTML += `<div class="prayer-stat-bar">
+      <span class="psb-label">${n}</span>
+      <div class="psb-track"><div class="psb-fill ${cls}" style="width:${pct}%"></div></div>
+      <span class="psb-pct" style="color:${color}">${pct}%</span>
+    </div>`;
+  });
+  if (days > 0) {
+    const fajrPct = Math.round(counts.fajr/days*100);
+    if (fajrPct < 70) {
+      el.innerHTML += `<div style="margin-top:12px;padding:10px;background:rgba(74,222,128,0.06);border-radius:10px;font-size:13px;color:rgba(255,255,255,0.6)">💡 <strong style="color:#4ade80">نصيحة:</strong> الفجر أضعف نقطة — جرّب تضبط منبه قبل الأذان بـ 15 دقيقة</div>`;
+    }
+  }
+}
+
+function buildChallenges() {
+  const el = document.getElementById('challengesList');
+  if (!el) return;
+
+  // calc real progress from userData
+  const prayers_data = userData?.prayers || {};
+  const days = Object.keys(prayers_data).length;
+
+  // streak of fajr
+  let fajrStreak = 0;
+  let tempDate = new Date();
+  for (let i=0; i<30; i++) {
+    const key = dateKey(tempDate);
+    if (prayers_data[key]?.fajr) fajrStreak++;
+    else break;
+    tempDate.setDate(tempDate.getDate()-1);
+  }
+
+  // full days
+  let fullDays = Object.values(prayers_data).filter(d => Object.values(d).filter(Boolean).length===5).length;
+
+  const challenges = [
+    {
+      icon:'🏆', cls:'c-gold',
+      title:'أسبوع الفجر الذهبي',
+      desc:'صلّ الفجر 7 أيام متتالية',
+      progress: Math.min(fajrStreak,7), total:7,
+      reward:'⭐ 200 نقطة + شارة ذهبية'
+    },
+    {
+      icon:'🌿', cls:'c-green',
+      title:'30 يوم من المحافظة',
+      desc:'صلّ الفروض الخمسة لمدة شهر',
+      progress: Math.min(fullDays,30), total:30,
+      reward:'⭐ 500 نقطة + لقب الخاشع'
+    },
+    {
+      icon:'📿', cls:'c-blue',
+      title:'مئة صلاة',
+      desc:'سجّل 100 صلاة محافظ',
+      progress: Math.min(userData?.totalPrayed||0, 100), total:100,
+      reward:'⭐ 300 نقطة'
+    },
+    {
+      icon:'🔥', cls:'c-gold',
+      title:'عشرة أيام متتالية',
+      desc:'حافظ على الستريك 10 أيام',
+      progress: Math.min(userData?.streak||0,10), total:10,
+      reward:'⭐ 150 نقطة'
+    },
+  ];
+
+  el.innerHTML = '';
+  challenges.forEach(c => {
+    const pct = Math.round(c.progress/c.total*100);
+    const done = c.progress >= c.total;
+    el.innerHTML += `<div class="challenge-card" style="${done?'border-color:rgba(74,222,128,0.35)':''}">
+      <div class="challenge-icon ${c.cls}">${c.icon}</div>
+      <div class="challenge-info">
+        <div class="challenge-title">${c.title} ${done?'✅':''}</div>
+        <div class="challenge-desc">${c.desc}</div>
+        <div class="mini-progress"><div class="mini-fill" style="width:${pct}%"></div></div>
+        <div class="challenge-reward">${c.reward}</div>
+      </div>
+      <div style="font-size:13px;color:${done?'#4ade80':'rgba(255,255,255,0.35)'};font-weight:700">${c.progress}/${c.total}</div>
+    </div>`;
+  });
+}
+
+// ============================================================
+// QURAN CONTENT
+// ============================================================
+const ayat = [
+  {arabic:'﴿ إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَّوْقُوتًا ﴾', trans:'إن الصلاة فريضة واجبة على المؤمنين في أوقات محددة', ref:'سورة النساء — آية 103'},
+  {arabic:'﴿ وَأَقِمِ الصَّلَاةَ إِنَّ الصَّلَاةَ تَنْهَىٰ عَنِ الْفَحْشَاءِ وَالْمُنكَرِ ﴾', trans:'أقم الصلاة، فإن الصلاة تصرف صاحبها عن المعاصي والمحرمات', ref:'سورة العنكبوت — آية 45'},
+  {arabic:'﴿ حَٰفِظُوا عَلَى الصَّلَوَٰتِ وَالصَّلَوٰةِ الْوُسْطَىٰ وَقُومُوا لِلَّهِ قَٰنِتِينَ ﴾', trans:'حافظوا على أداء الصلوات جميعاً وبخاصة صلاة العصر خاشعين لله', ref:'سورة البقرة — آية 238'},
+  {arabic:'﴿ فَوَيْلٌ لِّلْمُصَلِّينَ ۞ الَّذِينَ هُمْ عَن صَلَاتِهِمْ سَاهُونَ ﴾', trans:'الويل لمن يصلون ثم هم عنها غافلون لاهون', ref:'سورة الماعون — آية 4-5'},
+];
+const ahadith = [
+  {narr:'عن عبدالله بن مسعود رضي الله عنه:', text:'سألت النبي ﷺ أي العمل أحب إلى الله؟ قال: «الصلاة على وقتها» قلت: ثم أي؟ قال: «بر الوالدين» قلت: ثم أي؟ قال: «الجهاد في سبيل الله»', ref:'متفق عليه — البخاري ومسلم'},
+  {narr:'عن جابر بن عبدالله رضي الله عنه:', text:'قال رسول الله ﷺ: «مثل الصلوات الخمس كمثل نهر جارٍ غمر على باب أحدكم، يغتسل منه كل يوم خمس مرات»', ref:'رواه مسلم'},
+  {narr:'عن أبي هريرة رضي الله عنه:', text:'قال رسول الله ﷺ: «أرأيتم لو أن نهراً بباب أحدكم يغتسل فيه كل يوم خمساً، ما تقول، هل يبقى من درنه شيء؟» قالوا: لا. قال: «فذلك مثل الصلوات الخمس»', ref:'متفق عليه'},
+  {narr:'عن بريدة رضي الله عنه:', text:'قال رسول الله ﷺ: «العهد الذي بيننا وبينهم الصلاة، فمن تركها فقد كفر»', ref:'رواه أحمد والترمذي والنسائي — صحيح'},
+];
+
+window.renderQuran = function(tab) {
+  curQuranTab = tab;
+  const c = document.getElementById('quranContent');
+  if (!c) return;
+  c.innerHTML = '';
+  if (tab === 'ayat') {
+    ayat.forEach(v => {
+      c.innerHTML += `<div class="verse-card"><div class="verse-arabic">${v.arabic}</div><div class="verse-trans">${v.trans}</div><div class="verse-ref">${v.ref}</div></div>`;
+    });
+  } else {
+    ahadith.forEach(h => {
+      c.innerHTML += `<div class="hadith-big-card"><div class="hadith-narr">${h.narr}</div><div class="hadith-main">${h.text}</div><div class="hadith-ref">${h.ref}</div></div>`;
+    });
+  }
+};
+
+window.switchTab = function(tab, el) {
+  document.querySelectorAll('.qtab').forEach(x => x.classList.remove('active'));
+  el.classList.add('active');
+  renderQuran(tab);
+};
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+window.showPage = function(p) {
+  document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(x => x.classList.remove('active'));
+  document.getElementById('page-' + p).classList.add('active');
+  const idx = {home:0,dashboard:1,quran:2,challenges:3}[p];
+  document.querySelectorAll('.nav-link')[idx]?.classList.add('active');
+  if (p === 'dashboard') { buildWeek(); buildCal(); buildPrayerStats(); }
+  if (p === 'challenges') buildChallenges();
+  if (p === 'quran') renderQuran(curQuranTab);
+  window.scrollTo(0,0);
+};
+
+window.switchAuthTab = function(tab) {
+  document.querySelectorAll('.auth-tab').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.auth-form').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.auth-tab')[tab==='login'?0:1].classList.add('active');
+  document.getElementById('form-'+tab).classList.add('active');
+  clearAuthMessages();
+};
+
+// ============================================================
+// SCREEN HELPERS
+// ============================================================
+function showLoader(msg) {
+  document.getElementById('loaderScreen').style.display = 'flex';
+  document.getElementById('loaderMsg').textContent = msg || 'جاري التحميل...';
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('appContainer').style.display = 'none';
+}
+function hideLoader() { document.getElementById('loaderScreen').style.display = 'none'; }
+function showAuthScreen() {
+  document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('appContainer').style.display = 'none';
+  document.getElementById('loaderScreen').style.display = 'none';
+}
+function showAuthError(msg) {
+  const e=document.getElementById('authError');
+  if(e){ e.textContent=msg; e.style.display='block'; }
+  const s=document.getElementById('authSuccess');
+  if(s) s.style.display='none';
+}
+function showAuthSuccess(msg) {
+  const s=document.getElementById('authSuccess');
+  if(s){ s.textContent=msg; s.style.display='block'; }
+  const e=document.getElementById('authError');
+  if(e) e.style.display='none';
+}
+function clearAuthMessages() {
+  const e=document.getElementById('authError'); if(e) e.style.display='none';
+  const s=document.getElementById('authSuccess'); if(s) s.style.display='none';
+}
+window.showToast = function(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.style.display='block';
+  clearTimeout(window._tt);
+  window._tt=setTimeout(()=>t.style.display='none',3000);
+};
+
+// ============================================================
+// DATE HELPERS
+// ============================================================
+function dateKey(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function getTodayKey() { return dateKey(new Date()); }
+function getYesterdayKey() { const d=new Date(); d.setDate(d.getDate()-1); return dateKey(d); }
+
+// ============================================================
+// STARS
+// ============================================================
+function makeStars() {
+  const s=document.getElementById('stars');
+  if(!s) return;
+  for(let i=0;i<55;i++){
+    const d=document.createElement('div');
+    d.className='star';
+    d.style.left=Math.random()*100+'%';
+    d.style.top=Math.random()*100+'%';
+    d.style.setProperty('--d', 2+Math.random()*4+'s');
+    d.style.setProperty('--delay', Math.random()*4+'s');
+    d.style.opacity=Math.random()*0.4+0.1;
+    s.appendChild(d);
+  }
+}
+
+// ============================================================
+// BOOT
+// ============================================================
+init();
+</script>
+</body>
+</html>
